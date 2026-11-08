@@ -36,7 +36,8 @@
       "sip-client.js",
       "rtp-session.js",
       "scanner.js",
-      "renderer/**/*"
+      "renderer/**/*",
+      "assets/**/*"
     ],
     "publish": [
       {

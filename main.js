@@ -89,19 +89,16 @@ function noteAuthStatus(urlString, status) {
 }
 
 // ── Tray icon ─────────────────────────────────────────────────────────────────
-function makeTrayIcon(color) {
-  const size = 16;
-  const buf = Buffer.alloc(size * size * 4);
-  const [r, g, b] = color;
-  for (let i = 0; i < size * size; i++) {
-    buf[i*4]=r; buf[i*4+1]=g; buf[i*4+2]=b; buf[i*4+3]=255;
-  }
-  return nativeImage.createFromBuffer(buf, { width: size, height: size });
+// The Inventus emblem with a small green (connected) or red (disconnected) dot.
+// The @2x files next to these are picked up automatically on high-DPI screens.
+function makeTrayIcon(online) {
+  return nativeImage.createFromPath(path.join(__dirname, 'assets', online ? 'tray-online.png' : 'tray-offline.png'));
 }
+const APP_ICON = path.join(__dirname, 'assets', 'icon.png');
 
 function updateTrayIcon() {
   if (!tray) return;
-  tray.setImage(makeTrayIcon(connectionStatus.online ? [34,197,94] : [239,68,68]));
+  tray.setImage(makeTrayIcon(connectionStatus.online));
   const ws = store.get('workstationName') || 'Unknown';
   tray.setToolTip(`Inventus DMS — ${ws} — ${connectionStatus.online ? 'Connected' : 'Disconnected'}`);
 }
@@ -301,6 +298,7 @@ function startHeartbeat() {
 function ensureCaptureWindow() {
   if (captureWindow && !captureWindow.isDestroyed()) return;
   captureWindow = new BrowserWindow({
+    icon: APP_ICON,
     width: 1, height: 1, show: false, skipTaskbar: true,
     webPreferences: {
       preload: path.join(__dirname, 'capture-preload.js'),
@@ -567,6 +565,7 @@ function resumeSoftphone() {
 function openSoftphoneWindow() {
   if (softphoneWindow && !softphoneWindow.isDestroyed()) { softphoneWindow.focus(); return; }
   softphoneWindow = new BrowserWindow({
+    icon: APP_ICON,
     width: 360, height: 560, resizable: false, autoHideMenuBar: true,
     title: 'Inventus DMS — Softphone', center: true,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false },
@@ -623,6 +622,7 @@ async function sendScanToSplitter() {
 function openScannerWindow() {
   if (scannerWindow && !scannerWindow.isDestroyed()) { scannerWindow.focus(); return; }
   scannerWindow = new BrowserWindow({
+    icon: APP_ICON,
     width: 400, height: 600, resizable: false, autoHideMenuBar: true,
     title: 'Inventus DMS — Scan Document', center: true,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false },
@@ -635,7 +635,7 @@ function openScannerWindow() {
 function createTray() {
   if (tray) return;
   try {
-    tray = new Tray(makeTrayIcon([239,68,68]));
+    tray = new Tray(makeTrayIcon(false));
     tray.on('click', () => openStatusWindow());
     updateTrayMenu();
   } catch (e) { /* tray unavailable */ }
@@ -643,6 +643,7 @@ function createTray() {
 
 function createLicenseWindow() {
   mainWindow = new BrowserWindow({
+    icon: APP_ICON,
     width: 480, height: 460, resizable: false, autoHideMenuBar: true,
     title: 'Inventus DMS — Activation', center: true,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false },
@@ -654,6 +655,7 @@ function createLicenseWindow() {
 function openStatusWindow() {
   if (statusWindow && !statusWindow.isDestroyed()) { statusWindow.focus(); return; }
   statusWindow = new BrowserWindow({
+    icon: APP_ICON,
     width: 460, height: 640, resizable: false, autoHideMenuBar: true,
     title: 'Inventus DMS — Dashboard', center: true,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false },
