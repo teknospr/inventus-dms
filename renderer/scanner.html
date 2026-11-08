@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Inventus DMS — Scan Document</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a; color: #e2e8f0; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center; -webkit-app-region: drag; padding: 20px 0;
+    }
+    .container { width: 100%; max-width: 340px; padding: 0 22px; -webkit-app-region: no-drag; }
+    .brand { text-align: center; margin-bottom: 20px; }
+    .brand-logo { width: 200px; max-width: 80%; height: auto; margin: 0 auto 6px; display: block; }
+    .brand h1 { font-size: 18px; font-weight: 700; color: #f1f5f9; }
+    .brand p { font-size: 12px; color: #64748b; margin-top: 3px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 22px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+    .field input, .field select {
+      width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 8px;
+      padding: 10px 12px; font-size: 14px; color: #f1f5f9; outline: none;
+    }
+    .field input:focus, .field select:focus { border-color: #3b82f6; }
+    .row { display: flex; gap: 10px; }
+    .row .field { flex: 1; }
+    .btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #1e40af, #2563eb); color: #fff; font-size: 14px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn.secondary { background: #334155; margin-top: 10px; }
+    .btn.success { background: linear-gradient(135deg, #059669, #10b981); }
+    .status { margin-top: 12px; font-size: 13px; text-align: center; min-height: 18px; }
+    .status.error { color: #f87171; }
+    .status.success { color: #4ade80; }
+    .whoami { text-align: center; font-size: 12px; color: #94a3b8; margin-bottom: 14px; }
+    .scanned { text-align: center; padding: 12px; border: 1px solid #334155; border-radius: 10px; margin-bottom: 12px; }
+    .scanned .pages { font-size: 22px; font-weight: 700; color: #f1f5f9; }
+    .hint { text-align: center; font-size: 11px; color: #475569; margin-top: 12px; line-height: 1.5; }
+    .hidden { display: none; }
+    .footer { text-align: center; margin-top: 16px; font-size: 11px; color: #1e293b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="brand">
+      <img data-brand-logo class="brand-logo" alt="Inventus" />
+      <p>Scan → Sale Document Splitter</p>
+    </div>
+
+    <!-- Login -->
+    <div class="card" id="loginView">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="you@company.com" autocomplete="username" spellcheck="false" />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn" id="loginBtn">Sign In</button>
+      <div class="status" id="loginStatus"></div>
+    </div>
+
+    <!-- Scan -->
+    <div class="card hidden" id="scanView">
+      <div class="whoami" id="whoami"></div>
+
+      <div class="row">
+        <div class="field">
+          <label for="driver">Driver</label>
+          <select id="driver"><option value="wia">WIA</option><option value="twain">TWAIN</option></select>
+        </div>
+        <div class="field">
+          <label for="source">Source</label>
+          <select id="source"><option value="glass">Flatbed</option><option value="feeder">Feeder (ADF)</option></select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="device">Scanner</label>
+          <select id="device"><option value="">Default device</option></select>
+        </div>
+        <div class="field">
+          <label for="dpi">DPI</label>
+          <select id="dpi"><option>150</option><option selected>200</option><option>300</option></select>
+        </div>
+      </div>
+
+      <button class="btn" id="scanBtn">Scan</button>
+      <div class="status" id="scanStatus"></div>
+
+      <div class="scanned hidden" id="scannedBox">
+        <div class="pages" id="pageCount">—</div>
+        <div style="font-size:12px;color:#94a3b8;">pages scanned</div>
+      </div>
+      <button class="btn success hidden" id="sendBtn">Send to Sale Splitter</button>
+
+      <button class="btn secondary" id="logoutBtn">Sign Out</button>
+      <div class="hint">After sending, open the sale's document splitter in the CRM and click <b>Load from Scanner</b>.</div>
+    </div>
+
+    <div class="footer">Inventus Corp &copy; 2026</div>
+  </div>
+  <script src="logo.js"></script>
+  <script src="scanner.js"></script>
+</body>
+</html>

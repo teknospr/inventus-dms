@@ -1,0 +1,113 @@
+{
+  "name": "inventus-dms",
+  "version": "1.1.0",
+  "description": "Inventus DMS",
+  "main": "main.js",
+  "author": "Inventus Corp",
+  "license": "UNLICENSED",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/teknospr/inventus-dms.git"
+  },
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win --x64 --publish never",
+    "build:mac": "electron-builder --mac --publish never",
+    "build:linux": "electron-builder --linux --publish never",
+    "release": "electron-builder --publish always"
+  },
+  "build": {
+    "appId": "com.inventus.dms",
+    "productName": "Inventus DMS",
+    "artifactName": "InventusDMS-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "capture-preload.js",
+      "config.js",
+      "updater.js",
+      "browser-monitor.js",
+      "process-monitor.js",
+      "sip-client.js",
+      "rtp-session.js",
+      "scanner.js",
+      "renderer/**/*"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "teknospr",
+        "repo": "inventus-dms",
+        "releaseType": "draft"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "runAfterFinish": true
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.business",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Inventus DMS uses the microphone for softphone calls."
+      }
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Office",
+      "maintainer": "Inventus Corp"
+    }
+  },
+  "dependencies": {
+    "electron-store": "8.1.0",
+    "electron-updater": "6.3.9",
+    "sql.js": "1.14.1",
+    "systeminformation": "5.31.6"
+  },
+  "devDependencies": {
+    "electron": "28.3.3",
+    "electron-builder": "25.1.8"
+  }
+}

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Inventus DMS — Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-app-region: drag;
+      overflow: hidden;
+    }
+    .inner { padding: 18px 20px 16px; display: flex; flex-direction: column; gap: 14px; -webkit-app-region: no-drag; flex: 1; overflow: hidden; }
+
+    /* Header */
+    .header { display: flex; align-items: center; gap: 10px; }
+    .logo { width: 34px; height: 34px; background: linear-gradient(135deg, #1e40af, #3b82f6); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 800; color: #fff; flex-shrink: 0; }
+    .header-text h1 { font-size: 15px; font-weight: 700; color: #f1f5f9; line-height: 1.2; }
+    .header-text p { font-size: 11px; color: #475569; margin-top: 1px; }
+    .conn-pill { margin-left: auto; display: flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #334155; border-radius: 20px; padding: 5px 10px; font-size: 12px; font-weight: 600; }
+    .conn-dot { width: 8px; height: 8px; border-radius: 50%; background: #374151; transition: background 0.3s, box-shadow 0.3s; }
+    .conn-dot.online  { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+    .conn-dot.offline { background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.4); }
+    .conn-dot.checking { background: #f59e0b; animation: blink 1s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* Stats grid */
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .stat-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 12px 10px; display: flex; flex-direction: column; gap: 6px; }
+    .stat-label { font-size: 10px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 20px; font-weight: 700; color: #f1f5f9; line-height: 1; }
+    .stat-sub { font-size: 10px; color: #475569; }
+    .bar-track { height: 4px; background: #0f172a; border-radius: 2px; overflow: hidden; margin-top: 2px; }
+    .bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; background: #3b82f6; }
+    .bar-fill.warn  { background: #f59e0b; }
+    .bar-fill.danger { background: #ef4444; }
+
+    /* Info section */
+    .info-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 12px 14px; }
+    .info-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 4px 0; border-bottom: 1px solid #0f172a; }
+    .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .info-row .lbl { color: #64748b; }
+    .info-row .val { color: #cbd5e1; text-align: right; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Disk drives list */
+    .drives { display: flex; flex-direction: column; gap: 6px; }
+    .drive-row { display: flex; flex-direction: column; gap: 3px; }
+    .drive-header { display: flex; justify-content: space-between; font-size: 11px; }
+    .drive-mount { color: #94a3b8; font-weight: 500; }
+    .drive-size  { color: #475569; }
+
+    /* Actions */
+    .actions { display: flex; gap: 8px; }
+    .btn { flex: 1; padding: 9px; background: linear-gradient(135deg, #1e40af, #2563eb); color: #fff; font-size: 12px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: opacity 0.15s; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn:hover:not(:disabled) { opacity: 0.88; }
+    .btn.secondary { background: #1e293b; border: 1px solid #334155; color: #94a3b8; }
+    .btn.secondary:hover:not(:disabled) { background: #273549; opacity: 1; }
+
+    /* Updates */
+    .update-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+    .update-card.has-update { border-color: #2563eb; box-shadow: 0 0 0 1px rgba(37,99,235,0.35); }
+    .update-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+    .update-title { font-size: 12px; font-weight: 600; color: #e2e8f0; }
+    .update-version { font-size: 11px; color: #64748b; font-variant-numeric: tabular-nums; }
+    .update-msg { font-size: 12px; color: #94a3b8; line-height: 1.4; }
+    .update-msg.error { color: #f87171; }
+    .update-msg.good { color: #4ade80; }
+    .update-actions { display: flex; gap: 8px; }
+
+    .footer { text-align: center; font-size: 10px; color: #1e293b; padding-bottom: 8px; -webkit-app-region: no-drag; }
+  </style>
+</head>
+<body>
+  <div class="inner">
+
+    <!-- Header -->
+    <div class="header">
+      <img data-brand-logo style="height:30px;width:auto;flex-shrink:0;" alt="Inventus" />
+      <div class="header-text">
+        <p id="wsName">Loading…</p>
+      </div>
+      <div class="conn-pill">
+        <div class="conn-dot checking" id="connDot"></div>
+        <span id="connLabel">Checking</span>
+      </div>
+    </div>
+
+    <!-- System stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">CPU</div>
+        <div class="stat-value" id="cpuVal">—</div>
+        <div class="stat-sub" id="cpuSub">usage</div>
+        <div class="bar-track"><div class="bar-fill" id="cpuBar" style="width:0%"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">RAM</div>
+        <div class="stat-value" id="ramVal">—</div>
+        <div class="stat-sub" id="ramSub">used</div>
+        <div class="bar-track"><div class="bar-fill" id="ramBar" style="width:0%"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Disk</div>
+        <div class="stat-value" id="diskVal">—</div>
+        <div class="stat-sub" id="diskSub">used</div>
+        <div class="bar-track"><div class="bar-fill" id="diskBar" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- Drives -->
+    <div class="info-card" id="drivesCard" style="display:none">
+      <div class="drives" id="drivesList"></div>
+    </div>
+
+    <!-- Server info -->
+    <div class="info-card">
+      <div class="info-row"><span class="lbl">Server</span><span class="val" id="serverUrl">—</span></div>
+      <div class="info-row"><span class="lbl">Last checked</span><span class="val" id="lastChecked">—</span></div>
+      <div class="info-row"><span class="lbl">Stats refreshed</span><span class="val" id="statsAge">—</span></div>
+    </div>
+
+    <!-- Updates -->
+    <div class="update-card" id="updateCard">
+      <div class="update-head">
+        <span class="update-title">Updates</span>
+        <span class="update-version" id="updateVersion">Version —</span>
+      </div>
+      <div class="update-msg" id="updateMsg">Not checked yet.</div>
+      <div class="update-actions">
+        <button class="btn secondary" id="updateCheckBtn">Check for Updates</button>
+        <button class="btn" id="updateBtn" style="display:none">Update</button>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="btn secondary" id="refreshBtn">Refresh Stats</button>
+      <button class="btn" id="checkBtn">Check Server</button>
+    </div>
+
+  </div>
+  <div class="footer">Inventus Corp &copy; 2026</div>
+  <script src="logo.js"></script>
+  <script src="status.js"></script>
+</body>
+</html>

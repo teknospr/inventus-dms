@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Inventus DMS — Softphone</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a; color: #e2e8f0; height: 100vh;
+      display: flex; align-items: center; justify-content: center; -webkit-app-region: drag;
+    }
+    .container { width: 100%; max-width: 320px; padding: 0 22px; -webkit-app-region: no-drag; }
+    .brand { text-align: center; margin-bottom: 22px; }
+    .brand-logo { width: 200px; max-width: 80%; height: auto; margin: 0 auto 6px; display: block; }
+    .brand h1 { font-size: 18px; font-weight: 700; color: #f1f5f9; }
+    .brand p { font-size: 12px; color: #64748b; margin-top: 3px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 24px; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+    .field input {
+      width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 8px;
+      padding: 10px 13px; font-size: 14px; color: #f1f5f9; outline: none;
+    }
+    .field input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.2); }
+    .btn {
+      width: 100%; padding: 12px; background: linear-gradient(135deg, #059669, #10b981);
+      color: #fff; font-size: 14px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer;
+    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn.secondary { background: #334155; margin-top: 10px; }
+    .status { margin-top: 14px; font-size: 13px; text-align: center; min-height: 18px; }
+    .status.error { color: #f87171; }
+    .status.success { color: #4ade80; }
+    .reg-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; }
+    .dot.on { background: #22c55e; box-shadow: 0 0 8px rgba(34,197,94,0.6); }
+    .ext { text-align: center; font-size: 22px; font-weight: 700; color: #f1f5f9; margin: 6px 0 2px; }
+    .name { text-align: center; font-size: 13px; color: #94a3b8; margin-bottom: 16px; }
+    .hint { text-align: center; font-size: 11px; color: #475569; margin-top: 14px; line-height: 1.5; }
+    .hidden { display: none; }
+    .footer { text-align: center; margin-top: 16px; font-size: 11px; color: #1e293b; }
+
+    .dial-input {
+      width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 8px;
+      padding: 11px 13px; font-size: 18px; color: #f1f5f9; outline: none; text-align: center;
+      letter-spacing: 1px; margin-bottom: 14px;
+    }
+    .dial-input:focus { border-color: #10b981; }
+    .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+    .keypad button {
+      background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: #e2e8f0;
+      font-size: 19px; padding: 12px 0; cursor: pointer; transition: background 0.12s;
+    }
+    .keypad button:hover { background: #334155; }
+    .circle {
+      width: 56px; height: 56px; border-radius: 50%; border: none; cursor: pointer;
+      font-size: 22px; color: #fff; display: flex; align-items: center; justify-content: center;
+      margin: 0 auto; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .circle.call { background: #16a34a; }
+    .circle.answer { background: #16a34a; }
+    .circle.hang { background: #dc2626; }
+    .circle.mute { background: #475569; }
+    .circle.mute.on { background: #b91c1c; }
+    .circle.pad { background: #475569; }
+    .circle.pad.on { background: #10b981; }
+    .circle.hold { background: #475569; }
+    .circle.hold.on { background: #d97706; }
+    .circle.xfer { background: #475569; }
+    .circle:hover { opacity: 0.9; }
+    #inCall .call-actions { gap: 12px; }
+    #inCall .circle { width: 46px; height: 46px; font-size: 18px; }
+    .incall-keypad { margin-top: 8px; }
+    .xfer-row { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+    .xfer-row .dial-input { margin-bottom: 0; font-size: 15px; }
+    .xfer-row .btn { width: auto; padding: 10px 14px; }
+    .call-actions { display: flex; gap: 28px; justify-content: center; margin-top: 12px; }
+    .incoming, #inCall { text-align: center; padding: 8px 0 4px; }
+    .incoming-label, .call-state { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.6px; }
+    .incoming-num, .call-num { font-size: 22px; font-weight: 700; color: #f1f5f9; margin: 6px 0 4px; }
+    .timer { font-size: 14px; color: #4ade80; margin-bottom: 14px; font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="brand">
+      <img data-brand-logo class="brand-logo" alt="Inventus" />
+      <p>Softphone · UDP extension</p>
+    </div>
+
+    <!-- Login view -->
+    <div class="card" id="loginView">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="you@company.com" autocomplete="username" spellcheck="false" />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn" id="loginBtn">Sign In &amp; Register</button>
+      <div class="status" id="loginStatus"></div>
+    </div>
+
+    <!-- Registered view -->
+    <div class="card hidden" id="phoneView">
+      <div class="reg-row"><span class="dot" id="regDot"></span><span id="regText">Registering…</span></div>
+      <div class="ext" id="extLabel">—</div>
+      <div class="name" id="nameLabel"></div>
+
+      <!-- Incoming call banner -->
+      <div class="incoming hidden" id="incomingBox">
+        <div class="incoming-label">Incoming call</div>
+        <div class="incoming-num" id="incomingNum">—</div>
+        <div class="call-actions">
+          <button class="circle answer" id="answerBtn" title="Answer">📞</button>
+          <button class="circle hang" id="declineBtn" title="Decline">✕</button>
+        </div>
+      </div>
+
+      <!-- Dialer -->
+      <div id="dialer">
+        <input id="dialInput" class="dial-input" type="text" inputmode="tel" placeholder="Extension or number" />
+        <div class="keypad">
+          <button>1</button><button>2</button><button>3</button>
+          <button>4</button><button>5</button><button>6</button>
+          <button>7</button><button>8</button><button>9</button>
+          <button>*</button><button>0</button><button>#</button>
+        </div>
+        <button class="circle call" id="callBtn" title="Call">📞</button>
+      </div>
+
+      <!-- In-call -->
+      <div id="inCall" class="hidden">
+        <div class="call-state" id="callStateLabel">Calling…</div>
+        <div class="call-num" id="callNum">—</div>
+        <div class="timer" id="callTimer"></div>
+        <div class="keypad incall-keypad hidden" id="dtmfPad">
+          <button>1</button><button>2</button><button>3</button>
+          <button>4</button><button>5</button><button>6</button>
+          <button>7</button><button>8</button><button>9</button>
+          <button>*</button><button>0</button><button>#</button>
+        </div>
+        <div class="call-actions">
+          <button class="circle mute" id="muteBtn" title="Mute">🎙️</button>
+          <button class="circle pad" id="padBtn" title="Keypad">⌨️</button>
+          <button class="circle hold" id="holdBtn" title="Hold">⏸️</button>
+          <button class="circle xfer" id="xferBtn" title="Transfer">↪️</button>
+          <button class="circle hang" id="hangupBtn" title="Hang up">✕</button>
+        </div>
+        <div class="xfer-row hidden" id="xferRow">
+          <input id="xferInput" class="dial-input" type="text" inputmode="tel" placeholder="Transfer to extension…" />
+          <button class="btn" id="xferGo">Transfer</button>
+        </div>
+      </div>
+
+      <div class="status error" id="phoneError"></div>
+      <button class="btn secondary" id="logoutBtn">Sign Out</button>
+    </div>
+
+    <div class="footer">Inventus Corp &copy; 2026</div>
+  </div>
+  <script src="logo.js"></script>
+  <script src="softphone.js"></script>
+</body>
+</html>

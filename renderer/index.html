@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Inventus DMS — Activation</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-app-region: drag;
+    }
+    .container { width: 100%; max-width: 380px; padding: 0 24px; -webkit-app-region: no-drag; }
+    .brand { text-align: center; margin-bottom: 28px; }
+    .logo {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      border-radius: 14px; display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px; font-size: 26px; font-weight: 800; color: #fff;
+      box-shadow: 0 4px 24px rgba(59,130,246,0.35);
+    }
+    .brand h1 { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+    .brand p { font-size: 13px; color: #64748b; margin-top: 4px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 28px; }
+    .field { margin-bottom: 18px; }
+    .field label { display: block; font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 7px; }
+    .field input {
+      width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 8px;
+      padding: 10px 13px; font-size: 14px; color: #f1f5f9; outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .field input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+    .field input.key-input { font-family: 'Courier New', monospace; font-size: 20px; font-weight: 700; letter-spacing: 5px; text-align: center; }
+    .field input::placeholder { color: #334155; }
+    .btn {
+      width: 100%; padding: 12px; background: linear-gradient(135deg, #1e40af, #2563eb);
+      color: #fff; font-size: 14px; font-weight: 600; border: none; border-radius: 8px;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn:hover:not(:disabled) { opacity: 0.88; }
+    .status { margin-top: 14px; font-size: 13px; text-align: center; min-height: 18px; }
+    .status.error { color: #f87171; }
+    .status.success { color: #4ade80; }
+    .footer { text-align: center; margin-top: 18px; font-size: 11px; color: #1e293b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="brand">
+      <img data-brand-logo style="width:210px;max-width:80%;height:auto;margin:0 auto 8px;display:block;" alt="Inventus" />
+      <p>License Activation</p>
+    </div>
+    <div class="card">
+      <div class="field">
+        <label for="serverUrl">Server</label>
+        <input id="serverUrl" type="url" readonly tabindex="-1" style="opacity:0.65;cursor:not-allowed;" />
+      </div>
+      <div class="field">
+        <label for="licenseKey">License Key</label>
+        <input id="licenseKey" class="key-input" type="text" inputmode="numeric" maxlength="8" placeholder="00000000" autocomplete="off" spellcheck="false" />
+      </div>
+      <button class="btn" id="activateBtn" disabled>Activate</button>
+      <div class="status" id="status"></div>
+    </div>
+    <div class="footer">Inventus Corp &copy; 2026</div>
+  </div>
+  <script src="logo.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>
